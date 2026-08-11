@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#071018">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>GPS-nopeusmittari</title>
+<style>
+:root{--bg:#071018;--panel:#101d28;--text:#f4f8fb;--muted:#8fa4b5;--accent:#36e39b;--blue:#45a9ff;--danger:#ff6578}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;overscroll-behavior:none;background:#071018}body{min-height:100dvh;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;touch-action:pan-x pan-y}
+.app{width:min(100%,560px);min-height:100dvh;margin:auto;padding:max(12px,env(safe-area-inset-top)) 14px calc(86px + env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 12%,#173149 0,#071018 48%,#03070b 100%)}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px}.title{font-size:.86rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.status{display:flex;align-items:center;gap:7px;font-size:.77rem;color:var(--muted)}.dot{width:9px;height:9px;border-radius:50%;background:#687782}.dot.on{background:var(--accent);box-shadow:0 0 12px #36e39b}.dot.err{background:var(--danger)}
+.panel{display:none}.panel.active{display:block}.speed-wrap{display:grid;place-items:center;min-height:clamp(285px,48dvh,410px)}.dial{width:min(78vw,370px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(from 225deg,var(--accent) 0deg,var(--accent) var(--angle,0deg),#263744 var(--angle,0deg),#263744 270deg,transparent 270deg);filter:drop-shadow(0 15px 35px #0008)}
+.dial:before{content:"";position:absolute;inset:12px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#132534,#081119 68%);border:1px solid #ffffff13}.speed{text-align:center;z-index:1}.speed-number{font-variant-numeric:tabular-nums;font-size:clamp(5rem,27vw,8rem);font-weight:780;letter-spacing:-.07em;line-height:.84}.unit{margin-top:14px;color:var(--muted);font-weight:750;letter-spacing:.15em}.accuracy{margin-top:9px;font-size:.75rem;color:var(--muted)}
+.card{background:#0d1821e8;border:1px solid #ffffff12;border-radius:20px;padding:15px;box-shadow:0 15px 40px #0007}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}.label{color:var(--muted);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em}.value{margin-top:5px;font-size:clamp(1rem,4.8vw,1.25rem);font-weight:760;font-variant-numeric:tabular-nums}.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}button{min-height:48px;border:0;border-radius:14px;padding:11px 7px;font:inherit;font-weight:760;color:#06120e;background:var(--accent);cursor:pointer}button.secondary{color:var(--text);background:#213442}button.stop{color:white;background:#7a2635}button.new{width:100%;margin-top:9px;color:#06121a;background:var(--blue)}button:disabled{opacity:.38}.laps{margin-top:10px;max-height:90px;overflow:auto}.lap{display:flex;justify-content:space-between;gap:8px;padding:8px 2px;border-top:1px solid #ffffff0d;color:var(--muted);font-size:.8rem}.lap strong{color:var(--text)}
+.bottom-info{display:flex;justify-content:space-between;align-items:end;margin-top:10px;padding:0 3px}.clock{font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums}.guard{font-size:.7rem;color:var(--accent);text-align:right}
+.log-head{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 12px}.log-head h2{margin:0;font-size:1.2rem}.small-btn{min-height:38px;padding:7px 12px;font-size:.78rem;background:#213442;color:white}.log-summary{color:var(--muted);font-size:.8rem;margin-bottom:10px}.log-list{display:grid;gap:9px}.log-row{background:#0d1821;border:1px solid #ffffff10;border-radius:14px;padding:11px}.log-main{display:flex;justify-content:space-between;font-weight:750}.log-sub{display:flex;justify-content:space-between;margin-top:5px;color:var(--muted);font-size:.75rem}.empty{text-align:center;color:var(--muted);padding:70px 20px}
+nav{position:fixed;z-index:5;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,560px);display:grid;grid-template-columns:1fr 1fr;padding:8px 14px calc(8px + env(safe-area-inset-bottom));background:#071018ee;border-top:1px solid #ffffff12;backdrop-filter:blur(15px)}.tab{background:transparent;color:var(--muted);min-height:52px}.tab.active{background:#173044;color:var(--accent)}
+@media(max-height:680px){.speed-wrap{min-height:250px}.dial{width:min(57dvh,300px)}.app{padding-top:8px}}
+</style>
+</head><body><main class="app">
+<header><div class="title">GPS-nopeusmittari</div><div class="status"><span id="dot" class="dot"></span><span id="gpsStatus">GPS käynnistyy…</span></div></header>
+<section id="meterPanel" class="panel active">
+<div class="speed-wrap"><div id="dial" class="dial"><div class="speed"><div id="speed" class="speed-number">0</div><div class="unit">km/h</div><div id="accuracy" class="accuracy">Tarkkuus: –</div></div></div></div>
+<div class="card"><div class="stats">
+<div><div class="label">Trippi</div><div id="distance" class="value">0,00 km</div></div><div><div class="label">Aika</div><div id="elapsed" class="value">00:00:00</div></div><div><div class="label">Keskinop.</div><div id="average" class="value">0,0</div></div></div>
+<div class="buttons"><button id="start">Käynnistä</button><button id="lap" class="secondary" disabled>Väliaika</button><button id="stop" class="stop" disabled>Pysäytä</button></div>
+<button id="newMeasurement" class="new">Uusi mittaus</button><div id="laps" class="laps"></div></div>
+<div class="bottom-info"><div id="clock" class="clock">--:--:--</div><div class="guard">Päivityksen esto käytössä mittauksen aikana</div></div>
+</section>
+<section id="logPanel" class="panel"><div class="log-head"><h2>Nopeusloki</h2><button id="clearLog" class="small-btn">Tyhjennä</button></div><div id="logSummary" class="log-summary"></div><div id="logList" class="log-list"></div></section>
+</main>
+<nav><button class="tab active" data-panel="meterPanel">Mittari</button><button class="tab" data-panel="logPanel">Loki</button></nav>
+<script>
+const $=id=>document.getElementById(id);let lastPos=null,tripMeters=0,running=false,startedAt=0,accumulatedMs=0,timer=null,lapCount=0,wakeLock=null,lastLogAt=0;
+let speedLog=JSON.parse(localStorage.getItem('gpsSpeedLog')||'[]');
+const fmtTime=ms=>{const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return[h,m,s%60].map(v=>String(v).padStart(2,'0')).join(':')};const elapsedMs=()=>accumulatedMs+(running?Date.now()-startedAt:0);
+function saveLog(){localStorage.setItem('gpsSpeedLog',JSON.stringify(speedLog.slice(-5000)))}
+function updateTrip(){const ms=elapsedMs();$('elapsed').textContent=fmtTime(ms);$('distance').textContent=(tripMeters/1000).toLocaleString('fi-FI',{minimumFractionDigits:2,maximumFractionDigits:2})+' km';$('average').textContent=(ms?(tripMeters/1000)/(ms/3600000):0).toLocaleString('fi-FI',{minimumFractionDigits:1,maximumFractionDigits:1})}
+function hav(a,b){const R=6371000,r=x=>x*Math.PI/180,d1=r(b.latitude-a.latitude),d2=r(b.longitude-a.longitude),q=Math.sin(d1/2)**2+Math.cos(r(a.latitude))*Math.cos(r(b.latitude))*Math.sin(d2/2)**2;return 2*R*Math.asin(Math.sqrt(q))}
+function setSpeed(k){k=Math.max(0,Math.min(299,k||0));$('speed').textContent=Math.round(k);$('dial').style.setProperty('--angle',Math.min(k/180,1)*270+'deg')}
+function addSpeedLog(k,c,p){if(!running||Date.now()-lastLogAt<2000)return;lastLogAt=Date.now();speedLog.push({t:Date.now(),s:+k.toFixed(1),a:Math.round(c.accuracy),d:+(tripMeters/1000).toFixed(3),lat:+c.latitude.toFixed(5),lon:+c.longitude.toFixed(5)});saveLog()}
+function onPosition(p){const c=p.coords;$('dot').className='dot on';$('gpsStatus').textContent='GPS aktiivinen';$('accuracy').textContent='Tarkkuus: ±'+Math.round(c.accuracy)+' m';let k=Number.isFinite(c.speed)&&c.speed>=0?c.speed*3.6:0;if(lastPos){const dt=(p.timestamp-lastPos.timestamp)/1000,dist=hav(lastPos.coords,c);if((!Number.isFinite(c.speed)||c.speed<0)&&dt>0)k=dist/dt*3.6;if(running&&c.accuracy<=50&&dt>0&&dt<15&&dist>Math.max(1.5,c.accuracy*.12))tripMeters+=dist}lastPos={coords:{latitude:c.latitude,longitude:c.longitude},timestamp:p.timestamp};if(k<1.5)k=0;setSpeed(k);addSpeedLog(k,c,p);updateTrip()}
+function onError(e){$('dot').className='dot err';$('gpsStatus').textContent=e.code===1?'Sijaintilupa estetty':'GPS ei saatavilla';$('accuracy').textContent=e.message;setSpeed(0)}
+if('geolocation'in navigator)navigator.geolocation.watchPosition(onPosition,onError,{enableHighAccuracy:true,maximumAge:500,timeout:15000});else onError({code:0,message:'Selain ei tue paikannusta'});
+async function lockScreen(){try{if('wakeLock'in navigator)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}
+$('start').onclick=()=>{if(running)return;running=true;startedAt=Date.now();lastPos=null;$('start').disabled=true;$('lap').disabled=false;$('stop').disabled=false;timer=setInterval(updateTrip,250);lockScreen()};
+$('lap').onclick=()=>{if(!running)return;lapCount++;const x=document.createElement('div');x.className='lap';x.innerHTML=`<span>Väliaika ${lapCount}</span><strong>${fmtTime(elapsedMs())} · ${(tripMeters/1000).toFixed(2)} km</strong>`;$('laps').prepend(x)};
+function stop(){if(!running)return;accumulatedMs+=Date.now()-startedAt;running=false;clearInterval(timer);$('start').disabled=false;$('start').textContent='Jatka';$('lap').disabled=true;$('stop').disabled=true;updateTrip();if(wakeLock){wakeLock.release();wakeLock=null}}
+$('stop').onclick=stop;
+$('newMeasurement').onclick=()=>{stop();tripMeters=0;accumulatedMs=0;startedAt=0;lapCount=0;lastPos=null;lastLogAt=0;$('laps').innerHTML='';$('start').textContent='Käynnistä';updateTrip();setSpeed(0)};
+function renderLog(){const box=$('logList');box.innerHTML='';$('logSummary').textContent=speedLog.length?`${speedLog.length} tallennettua nopeuspistettä · tallennus 2 sekunnin välein`:'Ei tallennettuja nopeustietoja';if(!speedLog.length){box.innerHTML='<div class="empty">Loki täyttyy, kun mittaus on käynnissä.</div>';return}speedLog.slice().reverse().slice(0,500).forEach(r=>{const d=document.createElement('div');d.className='log-row';d.innerHTML=`<div class="log-main"><span>${new Date(r.t).toLocaleTimeString('fi-FI')}</span><span>${r.s.toLocaleString('fi-FI')} km/h</span></div><div class="log-sub"><span>${new Date(r.t).toLocaleDateString('fi-FI')} · ±${r.a} m</span><span>${r.d.toLocaleString('fi-FI')} km</span></div>`;box.appendChild(d)})}
+$('clearLog').onclick=()=>{speedLog=[];saveLog();renderLog()};document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.panel).classList.add('active');if(b.dataset.panel==='logPanel')renderLog()});
+window.addEventListener('beforeunload',e=>{if(running){e.preventDefault();e.returnValue=''}});document.addEventListener('touchmove',e=>{if(running&&scrollY===0&&e.touches[0].clientY>40)e.preventDefault()},{passive:false});
+setInterval(()=>$('clock').textContent=new Date().toLocaleTimeString('fi-FI'),250);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running)lockScreen()});updateTrip();
+</script></body></html>
